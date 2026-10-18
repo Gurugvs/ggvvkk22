@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================================
+       404 ERROR PAGE STYLES (PRANK SCREEN)
+       ======================================================== */
+    :root {
+      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Outfit", sans-serif;
+      --font-mono: 'Fira Code', monospace, Consolas;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: #ffffff;
+      color: #202124;
+      font-family: var(--font-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .prank-container {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      text-align: center;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .glitch-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .error-code {
+      font-size: clamp(6rem, 18vw, 9rem);
+      font-weight: 900;
+      color: #202124;
+      line-height: 1;
+      position: relative;
+      letter-spacing: -2px;
+      user-select: none;
+    }
+
+    /* Subtle glitch flicker effect */
+    .glitch-wrapper:hover .error-code::before,
+    .glitch-wrapper:hover .error-code::after {
+      content: attr(data-text);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .glitch-wrapper:hover .error-code::before {
+      left: 2px;
+      text-shadow: -2px 0 #ff0055;
+      clip: rect(24px, 550px, 90px, 0);
+      animation: glitch-anim 2s infinite linear alternate-reverse;
+    }
+    .glitch-wrapper:hover .error-code::after {
+      left: -2px;
+      text-shadow: -2px 0 #00ffff;
+      clip: rect(85px, 550px, 140px, 0);
+      animation: glitch-anim2 2s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim {
+      0% { clip: rect(10px, 9999px, 44px, 0); }
+      50% { clip: rect(60px, 9999px, 80px, 0); }
+      100% { clip: rect(30px, 9999px, 95px, 0); }
+    }
+    @keyframes glitch-anim2 {
+      0% { clip: rect(50px, 9999px, 75px, 0); }
+      50% { clip: rect(15px, 9999px, 35px, 0); }
+      100% { clip: rect(80px, 9999px, 110px, 0); }
+    }
+
+    .error-title {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 600;
+      margin-top: 10px;
+      color: #3c4043;
+    }
+
+    .error-desc {
+      max-width: 520px;
+      color: #5f6368;
+      font-size: 1.05rem;
+      margin: 16px 0 24px;
+      line-height: 1.6;
+    }
+
+    .highlight-url {
+      background: #f1f3f4;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      color: #d93025;
+      font-weight: 600;
+    }
+
+    .error-terminal {
+      background: #f8f9fa;
+      border: 1px solid #e8eaed;
+      border-radius: 10px;
+      padding: 16px 24px;
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #3c4043;
+      margin-bottom: 28px;
+      line-height: 1.8;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      max-width: 520px;
+      width: 100%;
+    }
+
+    .term-dim {
+      color: #70757a;
+    }
+
+    .prank-actions {
+      margin-top: 8px;
+    }
+
+    .btn-fix {
+      background: linear-gradient(135deg, #ff2a85, #ff477e);
+      color: #ffffff;
+      border: none;
+      font-size: 1.05rem;
+      font-weight: 600;
+      padding: 14px 30px;
+      border-radius: 30px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 14px rgba(255, 42, 133, 0.35);
+      outline: none;
+      user-select: none;
+    }
+
+    .btn-fix:hover {
+      background: linear-gradient(135deg, #e6146f, #ff2a85);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 42, 133, 0.55);
+    }
+
+    .btn-fix:active {
+      transform: translateY(1px);
+    }
+
+    .hint-text {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: #80868b;
+    }
+
+    /* Glitch System Override Overlay */
+    .glitch-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000000;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+
+    .glitch-overlay.active {
+      display: flex;
+      animation: crtFlicker 0.15s infinite;
+    }
+
+    .glitch-scanlines {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.6) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+    }
+
+    .glitch-message {
+      text-align: center;
+      z-index: 2;
+      padding: 20px;
+    }
+
+    .override-text {
+      font-family: var(--font-mono);
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      color: #ff0055;
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-shadow: 0 0 15px #ff0055, 0 0 30px #ff0055;
+      animation: glitchShake 0.2s infinite;
+    }
+
+    .override-sub {
+      font-family: var(--font-mono);
+      font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+      color: #00ffcc;
+      margin-top: 14px;
+      letter-spacing: 2px;
+    }
+
+    .override-countdown {
+      font-family: var(--font-mono);
+      font-size: clamp(4rem, 12vw, 6rem);
+      color: #ff75b5;
+      font-weight: 900;
+      margin-top: 24px;
+      text-shadow: 0 0 25px #ff2a85;
+    }
+
+    @keyframes crtFlicker {
+      0% { opacity: 0.95; }
+      50% { opacity: 1; }
+      100% { opacity: 0.92; }
+    }
+
+    @keyframes glitchShake {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(-3px, 2px); }
+      50% { transform: translate(3px, -2px); }
+      75% { transform: translate(-2px, -1px); }
+      100% { transform: translate(2px, 1px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================
+       404 ERROR PRANK SCREEN
+       ======================================================== -->
+  <div id="prank-screen" class="prank-container">
+    <div class="glitch-wrapper">
+      <h1 class="error-code" data-text="404">404</h1>
+    </div>
+    <h2 class="error-title">Page Not Found</h2>
+    <p class="error-desc">
+      The requested URL <span class="highlight-url" id="requested-path">/vijayavishal</span> was not found on this server.
+      That’s all we know.
+    </p>
+
+    <div class="error-terminal">
+      <p><span class="term-dim">> Status:</span> 404_PAGE_MISSING</p>
+      <p><span class="term-dim">> Error Code:</span> ERR_BIRTHDAY_CELEBRATION_UNRESOLVED</p>
+      <p><span class="term-dim">> Diagnostic:</span> VIP Entity detected in cache. Manual override required.</p>
+    </div>
+
+    <div class="prank-actions">
+      <button id="fix-error-btn" class="btn-fix">
+        <span class="btn-icon">⚡</span> Tap to Fix Error & Reconnect
+      </button>
+    </div>
+    <p class="hint-text">⚠️ Warning: Clicking will initiate Emergency Recovery Protocol</p>
+  </div>
+
+  <!-- Glitch Overlay effect -->
+  <div id="glitch-overlay" class="glitch-overlay">
+    <div class="glitch-scanlines"></div>
+    <div class="glitch-message">
+      <div class="override-text">🚨 SYSTEM OVERRIDE 🚨</div>
+      <div class="override-sub">CALIBRATING PARTY PROTOCOL...</div>
+      <div class="override-countdown" id="override-count">3</div>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer for instant sound effects
+    class ErrorSoundFx {
+      constructor() {
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type = 'sine', duration = 0.2, gainVal = 0.15) {
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {
+          console.warn('Audio playback error', e);
+        }
+      }
+
+      playGlitchBeep() {
+        this.init();
+        this.playTone(880, 'sawtooth', 0.1, 0.2);
+      }
+
+      playFanfare() {
+        this.init();
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          setTimeout(() => {
+            this.playTone(freq, 'triangle', 0.5, 0.25);
+          }, idx * 120);
+        });
+      }
+    }
+
+    const sound = new ErrorSoundFx();
+
+    // Dynamically show the current path if available
+    const requestedPathEl = document.getElementById('requested-path');
+    if (window.location.pathname && window.location.pathname !== '/' && !window.location.pathname.endsWith('404.html')) {
+      requestedPathEl.textContent = window.location.pathname;
+    }
+
+    const fixBtn = document.getElementById('fix-error-btn');
+    const glitchOverlay = document.getElementById('glitch-overlay');
+    const countEl = document.getElementById('override-count');
+    const prankScreen = document.getElementById('prank-screen');
+
+    let isTriggered = false;
+    let autoInterval = null;
+
+    function triggerOverride() {
+      if (isTriggered) return;
+      isTriggered = true;
+      if (autoInterval) clearInterval(autoInterval);
+
+      sound.init();
+      glitchOverlay.classList.add('active');
+
+      let count = 3;
+      countEl.textContent = count;
+      sound.playGlitchBeep();
+
+      const countInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countEl.textContent = count;
+          sound.playGlitchBeep();
+        } else {
+          clearInterval(countInterval);
+          countEl.textContent = '🚀 GO!';
+          sound.playFanfare();
+
+          setTimeout(() => {
+            // Fade out prank screen
+            prankScreen.style.opacity = '0';
+            prankScreen.style.transform = 'scale(1.1)';
+
+            setTimeout(() => {
+              // Redirect to main celebration page
+              try {
+                sessionStorage.setItem('prank_solved', 'true');
+              } catch (e) {}
+              window.location.href = 'index.html?celebrate=true';
+            }, 600);
+          }, 600);
+        }
+      }, 800);
+    }
+
+    fixBtn.addEventListener('click', triggerOverride);
+
+    // Auto-start override to index page after a brief 3s delay
+    let autoCountdown = 3;
+    autoInterval = setInterval(() => {
+      autoCountdown--;
+      if (autoCountdown > 0) {
+        fixBtn.innerHTML = `<span class="btn-icon">⚡</span> Auto-fixing in ${autoCountdown}s...`;
+      } else {
+        clearInterval(autoInterval);
+        triggerOverride();
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

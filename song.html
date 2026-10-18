@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magale (From Baththa) - Now Playing</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       SPOTIFY STYLE "NOW PLAYING" PAGE FOR MAGALE (FROM BATHTHA)
+       ========================================================================== */
+    :root {
+      --bg-ambient-top: #420b29;
+      --bg-ambient-mid: #250617;
+      --bg-ambient-bot: #10020a;
+      --player-bg: #0d0208;
+      
+      --text-primary: #ffffff;
+      --text-secondary: #e2b6cb;
+      --text-subdued: #b8869f;
+      
+      --spotify-green: #ff2a85;
+      --spotify-accent: #ff75b5;
+      
+      --card-bg: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(255, 255, 255, 0.14);
+      --card-border: rgba(255, 182, 218, 0.15);
+
+      --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background: linear-gradient(180deg, var(--bg-ambient-top) 0%, var(--bg-ambient-mid) 50%, var(--bg-ambient-bot) 100%);
+      color: var(--text-primary);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    /* Ambient Glow Behind Album */
+    .ambient-glow {
+      position: fixed;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(255, 42, 133, 0.35) 0%, rgba(66, 11, 41, 0.15) 50%, transparent 70%);
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ==========================================================================
+       TOP NAVIGATION BAR
+       ========================================================================== */
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      background: rgba(66, 11, 41, 0.45);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
+      text-decoration: none;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .btn-back-home:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.03);
+    }
+
+    .track-header-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      color: #f1f1f1;
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .top-icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.15rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .top-icon-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.08);
+    }
+
+    /* ==========================================================================
+       MAIN CENTER CONTENT (ALBUM ARTWORK + CARDS)
+       ========================================================================== */
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 20px 140px;
+      z-index: 1;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Center Artwork Card */
+    .album-art-container {
+      margin: 20px 0 44px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .album-art-card {
+      width: min(85vw, 440px);
+      height: min(85vw, 440px);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.85), 0 10px 25px rgba(255, 42, 133, 0.35);
+      position: relative;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .album-art-card:hover {
+      transform: scale(1.02);
+    }
+
+    .album-cover-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .album-art-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 65%, rgba(0, 0, 0, 0.7) 100%);
+      pointer-events: none;
+    }
+
+    .album-tamil-title {
+      position: absolute;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #ffcad4;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* Lower Grid Info Cards */
+    .info-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+      max-width: 860px;
+    }
+
+    .info-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: background 0.25s ease, transform 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-card:hover {
+      background: var(--card-hover);
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .card-action-link {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-subdued);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .card-action-link:hover {
+      color: var(--text-primary);
+      text-decoration: underline;
+    }
+
+    /* Artist Card Content */
+    .artist-preview {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .artist-photo-thumb {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+    }
+
+    .artist-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .artist-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .artist-listeners {
+      font-size: 0.85rem;
+      color: var(--text-subdued);
+    }
+
+    .artist-bio {
+      margin-top: 14px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Credits Card Content */
+    .credits-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .credit-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 8px;
+    }
+
+    .credit-role {
+      font-size: 0.85rem;
+      color: var(--text-subdued);
+    }
+
+    .credit-names {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: right;
+    }
+
+    /* ==========================================================================
+       BOTTOM FIXED AUDIO PLAYER BAR (SPOTIFY STYLE)
+       ========================================================================== */
+    .player-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 90px;
+      background: var(--player-bg);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: grid;
+      grid-template-columns: 320px 1fr 320px;
+      align-items: center;
+      padding: 0 24px;
+      z-index: 100;
+    }
+
+    /* Player Left: Track Details */
+    .player-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .mini-cover {
+      width: 56px;
+      height: 56px;
+      border-radius: 6px;
+      object-fit: cover;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .track-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-width: 190px;
+    }
+
+    .track-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+
+    .track-title:hover {
+      text-decoration: underline;
+    }
+
+    .track-artist {
+      font-size: 0.78rem;
+      color: var(--text-subdued);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+
+    .track-artist:hover {
+      color: var(--text-primary);
+      text-decoration: underline;
+    }
+
+    .btn-heart {
+      background: transparent;
+      border: none;
+      color: var(--text-subdued);
+      font-size: 1.15rem;
+      cursor: pointer;
+      margin-left: 6px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-heart:hover {
+      color: var(--text-primary);
+      transform: scale(1.15);
+    }
+
+    .btn-heart.active {
+      color: var(--spotify-green);
+    }
+
+    /* Player Center: Controls & Timeline */
+    .player-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .ctrl-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-subdued);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ctrl-btn:hover {
+      color: var(--text-primary);
+      transform: scale(1.08);
+    }
+
+    .ctrl-btn.active {
+      color: var(--spotify-green);
+      position: relative;
+    }
+
+    .ctrl-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--spotify-green);
+    }
+
+    .btn-play-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--text-primary);
+      color: #000000;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .btn-play-toggle:hover {
+      transform: scale(1.08);
+      background: #f0f0f0;
+    }
+
+    /* Timeline & Progress Bar */
+    .playback-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .time-stamp {
+      font-size: 0.72rem;
+      font-family: 'Fira Code', monospace;
+      color: var(--text-subdued);
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+      transition: height 0.1s ease;
+    }
+
+    .progress-track:hover {
+      height: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--text-primary);
+      border-radius: 2px;
+      width: 9.5%; /* default ~0:22 / 3:51 */
+      position: relative;
+      transition: background-color 0.1s ease;
+    }
+
+    .progress-track:hover .progress-fill {
+      background: var(--spotify-green);
+    }
+
+    .progress-thumb {
+      display: none;
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .progress-track:hover .progress-thumb {
+      display: block;
+    }
+
+    /* Player Right: Volume & Utilities */
+    .player-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 16px;
+    }
+
+    .volume-bar-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 110px;
+    }
+
+    .volume-slider {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .volume-fill {
+      height: 100%;
+      background: var(--text-primary);
+      width: 75%;
+      border-radius: 2px;
+    }
+
+    .volume-slider:hover .volume-fill {
+      background: var(--spotify-green);
+    }
+
+    /* Lyrics Modal / Drawer */
+    .lyrics-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(25px);
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .lyrics-modal.active {
+      display: flex;
+      animation: modalFade 0.3s ease;
+    }
+
+    @keyframes modalFade {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .lyrics-close {
+      position: absolute;
+      top: 24px;
+      right: 32px;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+    }
+
+    .lyrics-content {
+      max-width: 600px;
+      max-height: 70vh;
+      overflow-y: auto;
+      line-height: 2.2;
+      font-size: 1.35rem;
+      color: #ffcad4;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .lyrics-tamil {
+      font-size: 1.6rem;
+      margin-bottom: 24px;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 880px) {
+      .info-cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .player-bar {
+        grid-template-columns: 1fr 1fr;
+        height: 80px;
+        padding: 0 16px;
+      }
+      .player-right {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .player-bar {
+        grid-template-columns: 1fr;
+        height: auto;
+        padding: 12px 16px 16px;
+        gap: 10px;
+      }
+      .player-left {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .top-header {
+        padding: 12px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient background glow -->
+  <div class="ambient-glow"></div>
+
+  <!-- ==========================================================================
+       TOP HEADER BAR
+       ========================================================================== -->
+  <header class="top-header">
+    <div class="top-left">
+      <a href="index.html" class="btn-back-home" title="Return to Vijayavishal's Celebration">
+        ← 🎉 Celebration Home
+      </a>
+      <span class="track-header-title">Magale (From Baththa)</span>
+    </div>
+
+    <div class="top-right">
+      <!-- Clock/History icon -->
+      <button class="top-icon-btn" title="Recently Played">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </button>
+
+      <!-- Lyrics icon -->
+      <button class="top-icon-btn" id="top-lyrics-btn" title="View Lyrics">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="22"></line>
+        </svg>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button class="top-icon-btn" id="top-fullscreen-btn" title="Toggle Fullscreen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       MAIN CENTER AREA (ALBUM ART + INFO CARDS)
+       ========================================================================== -->
+  <main class="main-container">
+    
+    <!-- Central Album Artwork -->
+    <div class="album-art-container">
+      <div class="album-art-card" id="album-card">
+        <img src="assets/rathiname_cover.jpg" alt="மகளே Magale Album Cover" class="album-cover-img" id="main-cover-img">
+        <div class="album-art-overlay"></div>
+      </div>
+    </div>
+
+    <!-- Below Album Cards Grid -->
+    <div class="info-cards-grid">
+      
+      <!-- Card 1: About the artist -->
+      <div class="info-card">
+        <div class="card-header">
+          <h3 class="card-title">About the artist</h3>
+        </div>
+        <div class="artist-preview">
+          <img src="assets/artist_portrait.jpg" alt="Sai Abhyankkar" class="artist-photo-thumb">
+          <div class="artist-details">
+            <h4 class="artist-name">Sai Abhyankkar</h4>
+            <span class="artist-listeners">3,420,000+ monthly listeners</span>
+          </div>
+        </div>
+        <p class="artist-bio">
+          Featured soundtrack handpicked for Vijayavishal's birthday celebration. "Magale" from the Tamil movie "Baththa" blends soulful acoustics, energetic rhythms, and uplifting vocals by Sai Abhyankkar &amp; Harini.
+        </p>
+      </div>
+
+      <!-- Card 2: Credits -->
+      <div class="info-card">
+        <div class="card-header">
+          <h3 class="card-title">Credits</h3>
+          <span class="card-action-link" id="credits-show-all">Show all</span>
+        </div>
+        <div class="credits-list">
+          <div class="credit-item">
+            <span class="credit-role">Lead Vocals</span>
+            <span class="credit-names">Sai Abhyankkar, Harini</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-role">Composer &amp; Producer</span>
+            <span class="credit-names">Sai Abhyankkar</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-role">Lyricist</span>
+            <span class="credit-names">Karthik Netha</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-role">Movie / Label</span>
+            <span class="credit-names">Baththa • Think Music</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-role">Dedication</span>
+            <span class="credit-names">Vijayavishal's Bash 🎂</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       BOTTOM FIXED PLAYER BAR
+       ========================================================================== -->
+  <footer class="player-bar">
+    
+    <!-- Left: Thumbnail & Title -->
+    <div class="player-left">
+      <img src="assets/rathiname_cover.jpg" alt="Mini cover" class="mini-cover">
+      <div class="track-meta">
+        <span class="track-title" title="Magale - From Baththa">Magale - From Baththa</span>
+        <span class="track-artist" title="Sai Abhyankkar, Harini">Sai Abhyankkar, Harini</span>
+      </div>
+      <button class="btn-heart" id="like-btn" title="Save to Your Library">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Center: Playback Controls & Progress Bar -->
+    <div class="player-center">
+      <div class="player-controls">
+        <!-- Shuffle -->
+        <button class="ctrl-btn" id="shuffle-btn" title="Shuffle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+        </button>
+
+        <!-- Previous -->
+        <button class="ctrl-btn" id="prev-btn" title="Restart Track">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="19 20 9 12 19 4 19 20"></polygon>
+            <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"></line>
+          </svg>
+        </button>
+
+        <!-- Big Play/Pause Toggle -->
+        <button class="btn-play-toggle" id="play-toggle-btn" title="Play">
+          <svg id="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        </button>
+
+        <!-- Next -->
+        <button class="ctrl-btn" id="next-btn" title="Replay Track">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 4 15 12 5 20 5 4"></polygon>
+            <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"></line>
+          </svg>
+        </button>
+
+        <!-- Repeat -->
+        <button class="ctrl-btn" id="repeat-btn" title="Repeat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="17 1 21 5 17 9"></polyline>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+            <polyline points="7 23 3 19 7 15"></polyline>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Timeline Bar -->
+      <div class="playback-bar">
+        <span class="time-stamp" id="current-time">0:00</span>
+        <div class="progress-track" id="progress-track" title="Seek Track">
+          <div class="progress-fill" id="progress-fill">
+            <div class="progress-thumb"></div>
+          </div>
+        </div>
+        <span class="time-stamp" id="total-time">--:--</span>
+      </div>
+    </div>
+
+    <!-- Right: Volume & Utilities -->
+    <div class="player-right">
+      <!-- Lyrics toggle button -->
+      <button class="ctrl-btn" id="lyrics-btn" title="Lyrics">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="22"></line>
+        </svg>
+      </button>
+
+      <!-- Volume control -->
+      <div class="volume-bar-wrapper">
+        <button class="ctrl-btn" id="volume-icon-btn" title="Mute/Unmute">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+        </button>
+        <div class="volume-slider" id="volume-slider" title="Volume">
+          <div class="volume-fill" id="volume-fill"></div>
+        </div>
+      </div>
+
+      <!-- Fullscreen expand button -->
+      <button class="ctrl-btn" id="bottom-fullscreen-btn" title="Full screen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+      </button>
+    </div>
+
+  </footer>
+
+  <!-- ==========================================================================
+       LYRICS MODAL OVERLAY
+       ========================================================================== -->
+  <div class="lyrics-modal" id="lyrics-modal">
+    <button class="lyrics-close" id="lyrics-close-btn">&times;</button>
+    <div class="lyrics-content">
+      <div class="lyrics-tamil">
+        செல்லமே மகளே, சந்தன அகலே... <br>
+        சொந்தமே உயிரே, தேன் மொழி... ✨<br>
+        மன்னவன் மகளே, மந்திரச் சிமிழே... <br>
+        மங்கல விளக்கே, கேளடி... 🌸
+      </div>
+      <p>
+        "Chellame magale, sandhana agale...<br>
+        Sondhame uyire, thaen mozhi...<br>
+        Mannavan magale, mandhira chimile...<br>
+        Mangala vilakke, keladi..."<br><br>
+        <em>"A golden melody radiating happiness, love, and sweet celebration for Vijayavishal!"</em>
+      </p>
+      <br>
+      <p style="font-size: 1rem; color: #ff85a1;">
+        🎵 Dedicated to Vijayavishal on this special birthday bash!
+      </p>
+    </div>
+  </div>
+
+  <!-- Audio Element for Magale From Baththa -->
+  <audio id="song-audio" preload="metadata" src="assets/Magale From _Baththa_.mp3"></audio>
+
+  <!-- Audio Player Controller Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const songAudio = document.getElementById('song-audio');
+      const playToggleBtn = document.getElementById('play-toggle-btn');
+      const playIcon = document.getElementById('play-icon');
+      const currentTimeEl = document.getElementById('current-time');
+      const totalTimeEl = document.getElementById('total-time');
+      const progressFill = document.getElementById('progress-fill');
+      const progressTrack = document.getElementById('progress-track');
+      const likeBtn = document.getElementById('like-btn');
+      const shuffleBtn = document.getElementById('shuffle-btn');
+      const repeatBtn = document.getElementById('repeat-btn');
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const lyricsBtn = document.getElementById('lyrics-btn');
+      const topLyricsBtn = document.getElementById('top-lyrics-btn');
+      const lyricsModal = document.getElementById('lyrics-modal');
+      const lyricsCloseBtn = document.getElementById('lyrics-close-btn');
+      const volumeSlider = document.getElementById('volume-slider');
+      const volumeFill = document.getElementById('volume-fill');
+      const volumeIconBtn = document.getElementById('volume-icon-btn');
+
+      function formatTime(secs) {
+        if (isNaN(secs) || secs < 0) return '0:00';
+        const m = Math.floor(secs / 60);
+        const s = Math.floor(secs % 60);
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+      }
+
+      function updatePlayIcon(isPlaying) {
+        if (playIcon) {
+          if (isPlaying) {
+            playIcon.innerHTML = `
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            `;
+          } else {
+            playIcon.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
+          }
+        }
+      }
+
+      function togglePlay() {
+        if (!songAudio) return;
+        if (songAudio.paused) {
+          songAudio.play().then(() => updatePlayIcon(true)).catch(err => console.log(err));
+        } else {
+          songAudio.pause();
+          updatePlayIcon(false);
+        }
+      }
+
+      if (playToggleBtn) playToggleBtn.addEventListener('click', togglePlay);
+
+      // Metadata & Time Updates
+      if (songAudio) {
+        songAudio.addEventListener('loadedmetadata', () => {
+          if (totalTimeEl && songAudio.duration) {
+            totalTimeEl.textContent = formatTime(songAudio.duration);
+          }
+        });
+
+        songAudio.addEventListener('timeupdate', () => {
+          if (!songAudio.duration) return;
+          if (currentTimeEl) currentTimeEl.textContent = formatTime(songAudio.currentTime);
+          if (progressFill) {
+            const pct = (songAudio.currentTime / songAudio.duration) * 100;
+            progressFill.style.width = `${pct}%`;
+          }
+          if (totalTimeEl && totalTimeEl.textContent === '--:--' && songAudio.duration) {
+            totalTimeEl.textContent = formatTime(songAudio.duration);
+          }
+        });
+
+        songAudio.addEventListener('play', () => updatePlayIcon(true));
+        songAudio.addEventListener('pause', () => updatePlayIcon(false));
+        songAudio.addEventListener('ended', () => {
+          if (!songAudio.loop) {
+            updatePlayIcon(false);
+            songAudio.currentTime = 0;
+          }
+        });
+
+        if (songAudio.readyState >= 1 && totalTimeEl && songAudio.duration) {
+          totalTimeEl.textContent = formatTime(songAudio.duration);
+        }
+      }
+
+      // Seek progress bar
+      if (progressTrack) {
+        progressTrack.addEventListener('click', (e) => {
+          if (!songAudio || !songAudio.duration) return;
+          const rect = progressTrack.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+          songAudio.currentTime = ratio * songAudio.duration;
+          if (currentTimeEl) currentTimeEl.textContent = formatTime(songAudio.currentTime);
+          if (progressFill) progressFill.style.width = `${ratio * 100}%`;
+        });
+      }
+
+      // Prev / Next button (restarts / replays song)
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          if (songAudio) {
+            songAudio.currentTime = 0;
+            songAudio.play().catch(() => {});
+          }
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          if (songAudio) {
+            songAudio.currentTime = 0;
+            songAudio.play().catch(() => {});
+          }
+        });
+      }
+
+      // Like Button toggle
+      if (likeBtn) {
+        likeBtn.addEventListener('click', () => {
+          likeBtn.classList.toggle('active');
+          if (likeBtn.classList.contains('active')) {
+            likeBtn.innerHTML = `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+            `;
+          } else {
+            likeBtn.innerHTML = `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+            `;
+          }
+        });
+      }
+
+      // Repeat & Shuffle buttons
+      if (repeatBtn) {
+        repeatBtn.addEventListener('click', () => {
+          if (!songAudio) return;
+          songAudio.loop = !songAudio.loop;
+          repeatBtn.classList.toggle('active', songAudio.loop);
+        });
+      }
+      if (shuffleBtn) {
+        shuffleBtn.addEventListener('click', () => shuffleBtn.classList.toggle('active'));
+      }
+
+      // Volume slider & mute
+      let prevVol = 0.85;
+      if (songAudio) songAudio.volume = prevVol;
+      if (volumeFill) volumeFill.style.width = `${prevVol * 100}%`;
+
+      if (volumeSlider) {
+        volumeSlider.addEventListener('click', (e) => {
+          const rect = volumeSlider.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+          if (songAudio) {
+            songAudio.volume = ratio;
+            songAudio.muted = false;
+          }
+          prevVol = ratio;
+          if (volumeFill) volumeFill.style.width = `${ratio * 100}%`;
+        });
+      }
+
+      if (volumeIconBtn) {
+        volumeIconBtn.addEventListener('click', () => {
+          if (!songAudio) return;
+          songAudio.muted = !songAudio.muted;
+          if (songAudio.muted) {
+            if (volumeFill) volumeFill.style.width = '0%';
+          } else {
+            if (volumeFill) volumeFill.style.width = `${(songAudio.volume || prevVol) * 100}%`;
+          }
+        });
+      }
+
+      // Lyrics modal open/close
+      const openLyrics = () => { if (lyricsModal) lyricsModal.classList.add('active'); };
+      const closeLyrics = () => { if (lyricsModal) lyricsModal.classList.remove('active'); };
+      if (lyricsBtn) lyricsBtn.addEventListener('click', openLyrics);
+      if (topLyricsBtn) topLyricsBtn.addEventListener('click', openLyrics);
+      if (lyricsCloseBtn) lyricsCloseBtn.addEventListener('click', closeLyrics);
+      if (lyricsModal) {
+        lyricsModal.addEventListener('click', (e) => {
+          if (e.target === lyricsModal) closeLyrics();
+        });
+      }
+
+      // Fullscreen functionality
+      const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+        }
+      };
+      const topFsBtn = document.getElementById('top-fullscreen-btn');
+      const bottomFsBtn = document.getElementById('bottom-fullscreen-btn');
+      if (topFsBtn) topFsBtn.addEventListener('click', toggleFullscreen);
+      if (bottomFsBtn) bottomFsBtn.addEventListener('click', toggleFullscreen);
+    });
+  </script>
+</body>
+</html>
