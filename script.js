@@ -675,8 +675,19 @@ document.addEventListener('DOMContentLoaded', () => {
     celebrationAudio.play().then(() => {
       updatePlayerIcons(true);
     }).catch(() => {
-      sound.startBirthdayMelody();
-      if (musicStatusText) musicStatusText.textContent = 'Music: ON';
+      // Browser blocked unmuted autoplay without prior gesture; arm on first user interaction anywhere
+      const resumeOnGesture = () => {
+        sound.stopBirthdayMelody();
+        celebrationAudio.play().then(() => {
+          updatePlayerIcons(true);
+        }).catch(() => {});
+        document.removeEventListener('click', resumeOnGesture);
+        document.removeEventListener('keydown', resumeOnGesture);
+        document.removeEventListener('touchstart', resumeOnGesture);
+      };
+      document.addEventListener('click', resumeOnGesture, { once: true });
+      document.addEventListener('keydown', resumeOnGesture, { once: true });
+      document.addEventListener('touchstart', resumeOnGesture, { once: true });
     });
   };
 
